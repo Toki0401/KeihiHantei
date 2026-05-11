@@ -1,0 +1,875 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>交際費・会議費 判定ボット</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Hiragino Kaku Gothic ProN', 'Noto Sans JP', sans-serif;
+    background: #f0f4f8;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+  }
+  #app {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    max-width: 560px;
+    height: 90vh;
+    max-height: 720px;
+    background: #fff;
+    border-radius: 16px;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.10);
+    overflow: hidden;
+  }
+  #header {
+    padding: 14px 20px;
+    background: #185FA5;
+    color: #fff;
+  }
+  #header h1 { font-size: 15px; font-weight: 600; }
+  #header p  { font-size: 11px; opacity: 0.85; margin-top: 3px; }
+  #messages {
+    flex: 1;
+    overflow-y: auto;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    background: #f7f9fc;
+  }
+  .msg { display: flex; gap: 8px; align-items: flex-start; }
+  .msg.user { flex-direction: row-reverse; }
+  .avatar {
+    width: 32px; height: 32px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 12px; font-weight: 600; flex-shrink: 0;
+  }
+  .bot-av  { background: #185FA5; color: #fff; }
+  .user-av { background: #e0e7ef; color: #185FA5; }
+  .bubble {
+    max-width: 82%;
+    padding: 10px 14px;
+    font-size: 14px;
+    line-height: 1.65;
+    white-space: pre-wrap;
+    word-break: break-word;
+  }
+  .msg.bot  .bubble {
+    background: #fff; color: #1a1a2e;
+    border-radius: 4px 16px 16px 16px;
+    border: 1px solid #e2e8f0;
+  }
+  .msg.user .bubble {
+    background: #185FA5; color: #fff;
+    border-radius: 16px 4px 16px 16px;
+  }
+
+  /* コンサルタント質問は強調バッジ付き */
+  .badge-consul {
+    display: inline-block;
+    margin-bottom: 8px;
+    padding: 2px 10px;
+    border-radius: 12px;
+    font-size: 11px;
+    font-weight: 700;
+    background: #EBF2FA;
+    color: #185FA5;
+    border: 1px solid #185FA5;
+  }
+
+  .choices { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+  .choice-btn {
+    background: #fff;
+    border: 1.5px solid #185FA5;
+    color: #185FA5;
+    padding: 7px 13px;
+    border-radius: 20px;
+    font-size: 13px;
+    cursor: pointer;
+    transition: background 0.15s, color 0.15s;
+    font-family: inherit;
+  }
+  .choice-btn:hover    { background: #e6f1fb; }
+  .choice-btn:disabled { opacity: 0.45; cursor: default; }
+
+  /* 結果カード */
+  .result-card {
+    margin-top: 10px;
+    padding: 13px 14px;
+    border-radius: 10px;
+    font-size: 13px;
+    line-height: 1.75;
+  }
+  .result-card.kosaishi { background: #fff4f0; border-left: 4px solid #c0392b; color: #4a1b0c; }
+  .result-card.kaigihi  { background: #f0f8ea; border-left: 4px solid #3B6D11; color: #27500A; }
+  .result-card.fukuri   { background: #e8f8f3; border-left: 4px solid #0F6E56; color: #04342C; }
+
+  .result-tag    { font-size: 15px; font-weight: 700; margin-bottom: 4px; }
+  .result-kubun  { font-size: 12px; opacity: 0.75; margin-bottom: 8px; }
+  .result-detail { margin-bottom: 8px; }
+
+  /* 科目バッジ（原価 / 販管費） */
+  .result-kamoku {
+    display: inline-block;
+    margin-bottom: 8px;
+    padding: 3px 10px;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: 700;
+  }
+  .kamoku-genka  { background: #185FA5; color: #fff; }
+  .kamoku-hankan { background: #5F5E5A; color: #fff; }
+  .kamoku-fukuri { background: #0F6E56; color: #fff; }
+
+  .result-no {
+    display: inline-block;
+    margin-top: 4px;
+    padding: 6px 12px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 700;
+    background: #fff;
+    border: 2px solid currentColor;
+    letter-spacing: 0.02em;
+  }
+  .result-card.kosaishi .result-no { border-color: #c0392b; color: #c0392b; }
+  .result-card.kaigihi  .result-no { border-color: #3B6D11; color: #3B6D11; }
+  .result-card.fukuri   .result-no { border-color: #0F6E56; color: #0F6E56; }
+
+  .result-approval {
+    margin-top: 8px;
+    font-size: 12px;
+    opacity: 0.8;
+    white-space: pre-wrap;
+  }
+  .result-note {
+    margin-top: 8px;
+    font-size: 11px;
+    opacity: 0.65;
+    border-top: 1px solid rgba(0,0,0,0.08);
+    padding-top: 6px;
+  }
+
+  .restart-btn {
+    margin-top: 10px;
+    background: transparent;
+    border: 1px solid #aab8c8;
+    color: #5a7a99;
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-size: 12px;
+    cursor: pointer;
+    font-family: inherit;
+    display: inline-block;
+  }
+  .restart-btn:hover { background: #e6f1fb; }
+
+  /* タブ切替 */
+  #tab-bar {
+    display: flex;
+    border-bottom: 2px solid #e2e8f0;
+    background: #fff;
+  }
+  .tab-btn {
+    flex: 1;
+    padding: 10px 0;
+    font-size: 13px;
+    font-weight: 600;
+    font-family: inherit;
+    border: none;
+    background: transparent;
+    color: #8a9ab0;
+    cursor: pointer;
+    border-bottom: 3px solid transparent;
+    margin-bottom: -2px;
+    transition: color 0.15s, border-color 0.15s;
+  }
+  .tab-btn.active {
+    color: #185FA5;
+    border-bottom-color: #185FA5;
+  }
+  .tab-btn:hover:not(.active) { color: #185FA5; background: #f0f6fc; }
+
+  /* 検索パネル */
+  #search-panel {
+    display: none;
+    flex-direction: column;
+    flex: 1;
+    overflow: hidden;
+  }
+  #search-panel.visible { display: flex; }
+  #chat-panel { display: flex; flex-direction: column; flex: 1; overflow: hidden; }
+  #chat-panel.hidden { display: none; }
+
+  #search-box-wrap {
+    padding: 12px 16px 8px;
+    background: #fff;
+    border-bottom: 1px solid #e2e8f0;
+  }
+  #search-input {
+    width: 100%;
+    padding: 9px 36px 9px 14px;
+    border: 1.5px solid #cdd5df;
+    border-radius: 24px;
+    font-size: 14px;
+    font-family: inherit;
+    outline: none;
+    color: #1a1a2e;
+    background: #f7f9fc;
+    position: relative;
+  }
+  #search-input:focus { border-color: #185FA5; background: #fff; }
+  #search-input-wrap { position: relative; }
+  #search-clear {
+    position: absolute; right: 12px; top: 50%;
+    transform: translateY(-50%);
+    background: none; border: none; cursor: pointer;
+    color: #aab8c8; font-size: 16px; padding: 0;
+    display: none;
+  }
+
+  #search-results {
+    flex: 1;
+    overflow-y: auto;
+    padding: 10px 14px;
+    background: #f7f9fc;
+  }
+  .search-hint {
+    text-align: center;
+    color: #aab8c8;
+    font-size: 13px;
+    margin-top: 40px;
+    line-height: 1.8;
+  }
+  .search-result-item {
+    background: #fff;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    padding: 12px 14px;
+    margin-bottom: 10px;
+    cursor: pointer;
+    transition: box-shadow 0.15s, border-color 0.15s;
+  }
+  .search-result-item:hover { box-shadow: 0 2px 10px rgba(24,95,165,0.12); border-color: #185FA5; }
+  .sri-type {
+    font-size: 11px;
+    font-weight: 700;
+    padding: 2px 8px;
+    border-radius: 10px;
+    display: inline-block;
+    margin-bottom: 6px;
+  }
+  .sri-type.kosaishi { background: #fff0ee; color: #c0392b; }
+  .sri-type.kaigihi  { background: #f0f8ea; color: #3B6D11; }
+  .sri-type.fukuri   { background: #e8f8f3; color: #0F6E56; }
+  .sri-title { font-size: 14px; font-weight: 700; color: #1a1a2e; margin-bottom: 4px; }
+  .sri-detail { font-size: 12px; color: #555; margin-bottom: 6px; line-height: 1.6; }
+  .sri-keywords { font-size: 11px; color: #aab8c8; }
+  .sri-no {
+    display: inline-block;
+    margin-top: 6px;
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 700;
+    border: 1.5px solid;
+  }
+  .kosaishi .sri-no { border-color: #c0392b; color: #c0392b; }
+  .kaigihi  .sri-no { border-color: #3B6D11; color: #3B6D11; }
+  .fukuri   .sri-no { border-color: #0F6E56; color: #0F6E56; }
+  .sri-kamoku {
+    display: inline-block;
+    margin-left: 6px;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: 700;
+    color: #fff;
+  }
+  .sri-kamoku.genka  { background: #185FA5; }
+  .sri-kamoku.hankan { background: #5F5E5A; }
+  .sri-kamoku.both   { background: #888; }
+  .sri-kamoku.fukuri-k { background: #0F6E56; }
+  .no-result { text-align: center; color: #aab8c8; font-size: 13px; margin-top: 32px; }
+
+  #input-area {
+    padding: 12px 16px;
+    border-top: 1px solid #e2e8f0;
+    display: flex;
+    gap: 8px;
+    background: #fff;
+  }
+  #input-area input {
+    flex: 1;
+    padding: 9px 14px;
+    border: 1px solid #cdd5df;
+    border-radius: 24px;
+    font-size: 14px;
+    font-family: inherit;
+    outline: none;
+    color: #1a1a2e;
+    background: #f7f9fc;
+  }
+  #input-area input:focus { border-color: #185FA5; background: #fff; }
+  #input-area button {
+    background: #185FA5; color: #fff;
+    border: none; border-radius: 24px;
+    padding: 9px 18px; font-size: 13px;
+    cursor: pointer; font-family: inherit; font-weight: 500;
+  }
+  #input-area button:hover { background: #0C447C; }
+  #footer {
+    text-align: center; font-size: 11px;
+    color: #aaa; padding: 6px; background: #fff;
+  }
+</style>
+</head>
+<body>
+<div id="app">
+  <div id="header">
+    <h1>交際費・会議費 判定ボット【事前申請用】</h1>
+    <p>交際費会議費規程（2026年6月1日制定）に基づき自動判定します</p>
+  </div>
+  <div id="tab-bar">
+    <button class="tab-btn active" onclick="switchTab('chat')">💬 ステップ判定</button>
+    <button class="tab-btn"        onclick="switchTab('search')">🔍 キーワード検索</button>
+  </div>
+  <div id="chat-panel">
+    <div id="messages"></div>
+    <div id="input-area">
+    <input type="text" id="user-input" placeholder="ボタンで選択してください" readonly />
+    <button onclick="sendText()">送信</button>
+    </div><!-- /#input-area -->
+  </div><!-- /#chat-panel -->
+
+  <div id="search-panel">
+    <div id="search-box-wrap">
+      <div id="search-input-wrap">
+        <input type="text" id="search-input" placeholder="例：手土産　飲酒　コンサルタント　懇親会…" oninput="onSearchInput()" />
+        <button id="search-clear" onclick="clearSearch()">✕</button>
+      </div>
+    </div>
+    <div id="search-results">
+      <div class="search-hint">費用に関するキーワードを入力してください<br>例：「手土産」「飲酒あり」「茶菓子」「懇親会」</div>
+    </div>
+  </div>
+
+  <div id="footer">Copyright © 2026 Qolony All rights reserved.</div>
+</div>
+
+<script>
+const msgs   = document.getElementById('messages');
+const inputEl = document.getElementById('user-input');
+
+// state.consultant: true=売上原価 / false=販管費
+let state = { step: 'start', consultant: null };
+
+// ===== 質問ツリー =====
+const questions = {
+
+  // ① 費用の大分類（最初の質問）
+  start: {
+    text: 'こんにちは！交際費・会議費の事前申請の判定をお手伝いします。\n\nまず、費用の種類を教えてください。',
+    choices: [
+      { label: '全社・部門・室単位の社内懇親会（社員旅行含む）', key: 'shinkon' },
+      { label: '接待・贈答・飲食・会議費など上記以外',           key: 'other'   }
+    ],
+    next: (k) => {
+      if (k === 'shinkon') return 'result_fukuri';
+      return 'ask_consultant';
+    }
+  },
+
+  // ② コンサルタント有無
+  ask_consultant: {
+    text: '今回の費用に【コンサルタント（業務委託の社外スタッフ）】は参加していますか？',
+    badge: '科目区分の確認',
+    choices: [
+      { label: 'はい（コンサルタントが参加する）', key: 'yes' },
+      { label: 'いいえ（参加しない）',             key: 'no'  }
+    ],
+    next: (k) => {
+      state.consultant = (k === 'yes');
+      return 'expense_type';
+    }
+  },
+
+  // ② 費用の種類
+  expense_type: {
+    text: '費用の内容を教えてください。',
+    choices: [
+      { label: '接待・贈答（ゴルフ・観劇・手土産・慶弔見舞など）', key: 'settai' },
+      { label: '飲食費（食事・会食など）',                           key: 'dining' },
+      { label: '会議室利用料',                                       key: 'room'   }
+    ],
+    next: (k) => {
+      if (k === 'settai') return 'result_kosaishi_settai';
+      if (k === 'room')   return 'result_room';
+      return 'has_drinking'; // dining
+    }
+  },
+
+  // ③ 飲酒あり？
+  has_drinking: {
+    text: '飲食の中に、お酒（アルコール）を飲んだ人は1名でもいますか？',
+    choices: [
+      { label: 'はい（1名でも飲酒あり）',     key: 'yes' },
+      { label: 'いいえ（全員ノンアルコール）', key: 'no'  }
+    ],
+    next: (k) => {
+      if (k === 'yes') return 'result_kosaishi_drink';
+      return 'cost_per_person';
+    }
+  },
+
+  // ④ 1人あたり金額
+  cost_per_person: {
+    text: '1人あたりの飲食費用（税抜）はいくらですか？',
+    choices: [
+      { label: '1万円以下（ちょうど1万円はここ）', key: 'low'  },
+      { label: '1万円超',                           key: 'high' }
+    ],
+    next: (k) => {
+      if (k === 'high') return 'result_kosaishi_high';
+      return 'has_agenda';
+    }
+  },
+
+  // ⑤ 議題あり？
+  has_agenda: {
+    text: '具体的な議題・目的（業務上の話し合いなど）はありますか？',
+    choices: [
+      { label: 'はい（明確な議題・目的あり）', key: 'yes' },
+      { label: 'いいえ（懇親・親睦のみ）',     key: 'no'  }
+    ],
+    next: (k) => {
+      if (k === 'no') return 'result_kosaishi_shinbo';
+      return 'has_snack';
+    }
+  },
+
+  // ⑥ 茶菓子・軽食のみ？
+  has_snack: {
+    text: '会議室で提供する茶菓子・軽食のみですか？\n（1人あたり税抜1千円以下の場合）',
+    choices: [
+      { label: '茶菓子・軽食あり、1人あたり1千円以下', key: 'yes' },
+      { label: 'それ以上、または該当しない',             key: 'no'  }
+    ],
+    next: (k) => {
+      if (k === 'yes') return 'result_kaigihi_snack';
+      return 'result_kaigihi';
+    }
+  }
+};
+
+// ===== 申請No・ラベルをコンサルタント有無で切り替えるヘルパー =====
+function getKosaishiNo()  { return state.consultant ? 'No1' : 'No2'; }
+function getKosaishiLbl() { return state.consultant ? '【事前申請】No1 交際費（売上原価）_FY26' : '【事前申請】No2 交際費（販管費）_FY26'; }
+function getKaigiNo()     { return state.consultant ? 'No3' : 'No4'; }
+function getKaigiLbl()    { return state.consultant ? '【事前申請】No3 会議費（売上原価）_FY26' : '【事前申請】No4 会議費（販管費）_FY26'; }
+function getKamokuClass() { return state.consultant ? 'kamoku-genka' : 'kamoku-hankan'; }
+function getKamokuText()  { return state.consultant ? '売上原価' : '販管費'; }
+
+const APPROVAL_KOSAISHI = '【承認者】CFO決裁（予算外）/ 上場準備室長決裁（予算内）';
+const APPROVAL_KAIGI    = '【承認者】CFO決裁（予算外）/ 上場準備室長決裁（予算内）';
+const APPROVAL_FUKURI   = '【承認者】各チームマネージャー';
+const NOTE_SOCIAL       = '※ 社内/社外の区別は申請書の中で入力してください。';
+
+// ===== 結果定義（動的に生成するためオブジェクトではなく関数で返す） =====
+const resultBuilders = {
+
+  result_kosaishi_settai: () => ({
+    type: 'kosaishi',
+    title: '→ 交際費',
+    detail: '接待・贈答・ゴルフ・観劇・手土産・慶弔見舞などは、飲酒の有無にかかわらず交際費となります。',
+    no: getKosaishiNo(), label: getKosaishiLbl(),
+    kamokuClass: getKamokuClass(), kamokuText: getKamokuText(),
+    approval: APPROVAL_KOSAISHI, note: NOTE_SOCIAL
+  }),
+
+  result_kosaishi_drink: () => ({
+    type: 'kosaishi',
+    title: '→ 交際費',
+    detail: '1名でも飲酒を伴う飲食は交際費です（社内のみ・社外参加問わず）。',
+    no: getKosaishiNo(), label: getKosaishiLbl(),
+    kamokuClass: getKamokuClass(), kamokuText: getKamokuText(),
+    approval: APPROVAL_KOSAISHI, note: NOTE_SOCIAL
+  }),
+
+  result_kosaishi_high: () => ({
+    type: 'kosaishi',
+    title: '→ 交際費',
+    detail: '1人あたりの飲食費が税抜1万円を超える場合は交際費です（ちょうど1万円は会議費の可能性あり）。',
+    no: getKosaishiNo(), label: getKosaishiLbl(),
+    kamokuClass: getKamokuClass(), kamokuText: getKamokuText(),
+    approval: APPROVAL_KOSAISHI, note: NOTE_SOCIAL
+  }),
+
+  result_kosaishi_shinbo: () => ({
+    type: 'kosaishi',
+    title: '→ 交際費',
+    detail: '具体的な議題・目的がない懇親・親睦目的の飲食は交際費です。',
+    no: getKosaishiNo(), label: getKosaishiLbl(),
+    kamokuClass: getKamokuClass(), kamokuText: getKamokuText(),
+    approval: APPROVAL_KOSAISHI, note: NOTE_SOCIAL
+  }),
+
+  result_kaigihi: () => ({
+    type: 'kaigihi',
+    title: '→ 会議費',
+    detail: '飲酒なし・1人あたり税抜1万円以下・具体的な議題あり、の飲食は会議費です。',
+    no: getKaigiNo(), label: getKaigiLbl(),
+    kamokuClass: getKamokuClass(), kamokuText: getKamokuText(),
+    approval: APPROVAL_KAIGI, note: NOTE_SOCIAL
+  }),
+
+  result_kaigihi_snack: () => ({
+    type: 'kaigihi',
+    title: '→ 会議費（茶菓子・軽食）',
+    detail: '会議室で提供する茶菓子・軽食で、1人あたり税抜1千円以下の場合は会議費です。',
+    no: getKaigiNo(), label: getKaigiLbl(),
+    kamokuClass: getKamokuClass(), kamokuText: getKamokuText(),
+    approval: APPROVAL_KAIGI, note: NOTE_SOCIAL
+  }),
+
+  result_fukuri: () => ({
+    type: 'fukuri',
+    title: '→ 福利厚生費',
+    detail: '全社または部門・室単位で全員参加の懇親会（飲酒の有無を問わず）は福利厚生費です。',
+    no: 'No5', label: '【事前申請】No5 福利厚生費（全社・部門別懇親会費）_FY26',
+    kamokuClass: 'kamoku-fukuri', kamokuText: '原価/販管費の区別なし',
+    approval: APPROVAL_FUKURI, note: ''
+  }),
+
+  result_room: () => ({
+    type: 'kaigihi',
+    title: '→ 会議室利用料',
+    detail: '会議室利用料は専用の事前申請フォームで申請してください。',
+    no: '—', label: '【事前申請】FY26_WeWork会議室利用申請',
+    kamokuClass: getKamokuClass(), kamokuText: getKamokuText(),
+    approval: '', note: ''
+  })
+};
+
+// ===== DOM生成 =====
+function addMsg(role, content, choices, badge) {
+  const div = document.createElement('div');
+  div.className = `msg ${role}`;
+  const av = document.createElement('div');
+  av.className = `avatar ${role === 'bot' ? 'bot-av' : 'user-av'}`;
+  av.textContent = role === 'bot' ? 'AI' : '私';
+  const bub = document.createElement('div');
+  bub.className = 'bubble';
+
+  if (badge) {
+    const b = document.createElement('div');
+    b.className = 'badge-consul';
+    b.textContent = badge;
+    bub.appendChild(b);
+    bub.appendChild(document.createElement('br'));
+  }
+
+  bub.appendChild(document.createTextNode(content));
+
+  if (choices) {
+    const cd = document.createElement('div');
+    cd.className = 'choices';
+    choices.forEach(c => {
+      const btn = document.createElement('button');
+      btn.className = 'choice-btn';
+      btn.textContent = c.label;
+      btn.onclick = () => handleChoice(c);
+      cd.appendChild(btn);
+    });
+    bub.appendChild(cd);
+  }
+  div.appendChild(av);
+  div.appendChild(bub);
+  msgs.appendChild(div);
+  msgs.scrollTop = msgs.scrollHeight;
+}
+
+function addResult(key) {
+  const r = resultBuilders[key]();
+
+  const div = document.createElement('div');
+  div.className = 'msg bot';
+  const av = document.createElement('div');
+  av.className = 'avatar bot-av';
+  av.textContent = 'AI';
+  const bub = document.createElement('div');
+  bub.className = 'bubble';
+  bub.appendChild(document.createTextNode('判定が完了しました！'));
+
+  const card = document.createElement('div');
+  card.className = `result-card ${r.type}`;
+
+  // タイトル
+  const tag = document.createElement('div');
+  tag.className = 'result-tag';
+  tag.textContent = r.title;
+  card.appendChild(tag);
+
+  // 科目バッジ
+  const kamoku = document.createElement('span');
+  kamoku.className = `result-kamoku ${r.kamokuClass}`;
+  kamoku.textContent = r.kamokuText;
+  card.appendChild(kamoku);
+
+  // 詳細
+  const detail = document.createElement('div');
+  detail.className = 'result-detail';
+  detail.textContent = r.detail;
+  card.appendChild(detail);
+
+  // 承認者
+  if (r.approval) {
+    const approval = document.createElement('div');
+    approval.className = 'result-approval';
+    approval.textContent = r.approval;
+    card.appendChild(approval);
+  }
+
+  // 申請No
+  if (r.no !== '—') {
+    const noDiv = document.createElement('div');
+    noDiv.className = 'result-no';
+    noDiv.textContent = `📋 Bakurakuで「${r.label}」を選択してください`;
+    card.appendChild(noDiv);
+  } else {
+    const noDiv = document.createElement('div');
+    noDiv.className = 'result-no';
+    noDiv.textContent = `📋 ${r.label}`;
+    card.appendChild(noDiv);
+  }
+
+  // 注意書き
+  if (r.note) {
+    const note = document.createElement('div');
+    note.className = 'result-note';
+    note.textContent = r.note;
+    card.appendChild(note);
+  }
+
+  bub.appendChild(card);
+
+  const rb = document.createElement('button');
+  rb.className = 'restart-btn';
+  rb.textContent = '↺ もう一度判定する';
+  rb.onclick = restart;
+  bub.appendChild(rb);
+
+  div.appendChild(av);
+  div.appendChild(bub);
+  msgs.appendChild(div);
+  msgs.scrollTop = msgs.scrollHeight;
+}
+
+function handleChoice(choice) {
+  document.querySelectorAll('.choice-btn').forEach(b => { b.disabled = true; });
+  addMsg('user', choice.label);
+  const q = questions[state.step];
+  const nextStep = q.next(choice.key);
+  state.step = nextStep;
+  setTimeout(() => {
+    if (resultBuilders[nextStep]) {
+      addResult(nextStep);
+    } else if (questions[nextStep]) {
+      const nq = questions[nextStep];
+      addMsg('bot', nq.text, nq.choices, nq.badge || null);
+    }
+  }, 350);
+}
+
+function sendText() {
+  addMsg('bot', '上のボタンから選択してください。');
+}
+
+function restart() {
+  state = { step: 'start', consultant: null };
+  msgs.innerHTML = '';
+  const q = questions['start'];
+  addMsg('bot', q.text, q.choices, q.badge);
+}
+
+inputEl.addEventListener('keydown', e => { if (e.key === 'Enter') sendText(); });
+
+// 初期表示
+const q0 = questions['start'];
+addMsg('bot', q0.text, q0.choices, q0.badge);
+
+// ===== タブ切替 =====
+function switchTab(tab) {
+  const chatPanel   = document.getElementById('chat-panel');
+  const searchPanel = document.getElementById('search-panel');
+  const tabs = document.querySelectorAll('.tab-btn');
+  if (tab === 'chat') {
+    chatPanel.classList.remove('hidden');
+    searchPanel.classList.remove('visible');
+    tabs[0].classList.add('active');
+    tabs[1].classList.remove('active');
+  } else {
+    chatPanel.classList.add('hidden');
+    searchPanel.classList.add('visible');
+    tabs[0].classList.remove('active');
+    tabs[1].classList.add('active');
+    document.getElementById('search-input').focus();
+  }
+}
+
+// ===== キーワード検索データ =====
+const searchIndex = [
+  {
+    id: 'kosaishi_settai',
+    type: 'kosaishi', typeLabel: '交際費',
+    title: '接待・贈答・ゴルフ・観劇・手土産・慶弔見舞',
+    detail: '飲酒の有無にかかわらず交際費。得意先等への接待・供応・贈答・旅行・ゴルフ・慶弔見舞・記念式典宴会費など。',
+    noGenka: '【事前申請】No1 交際費（売上原価）_FY26',
+    noHankan: '【事前申請】No2 交際費（販管費）_FY26',
+    kamoku: 'both',
+    keywords: ['接待','贈答','ゴルフ','観劇','手土産','慶弔','見舞','記念','式典','宴会','供応','旅行']
+  },
+  {
+    id: 'kosaishi_drink',
+    type: 'kosaishi', typeLabel: '交際費',
+    title: '飲酒を伴う飲食',
+    detail: '1名でも飲酒した場合は交際費。社内のみ・社外参加問わず。',
+    noGenka: '【事前申請】No1 交際費（売上原価）_FY26',
+    noHankan: '【事前申請】No2 交際費（販管費）_FY26',
+    kamoku: 'both',
+    keywords: ['飲酒','アルコール','お酒','酒','ビール','ワイン','飲み','居酒屋','会食']
+  },
+  {
+    id: 'kosaishi_high',
+    type: 'kosaishi', typeLabel: '交際費',
+    title: '1人あたり税抜1万円超の飲食',
+    detail: '参加者1人あたりの飲食費（税抜）が10,000円を超える場合は交際費。',
+    noGenka: '【事前申請】No1 交際費（売上原価）_FY26',
+    noHankan: '【事前申請】No2 交際費（販管費）_FY26',
+    kamoku: 'both',
+    keywords: ['1万円超','高額','高い','10000円','一万円超','高級']
+  },
+  {
+    id: 'kosaishi_shinbo',
+    type: 'kosaishi', typeLabel: '交際費',
+    title: '議題なし・懇親・親睦目的の飲食',
+    detail: '具体的な議題・業務目的がなく、懇親・親睦のみを目的とする飲食は交際費。',
+    noGenka: '【事前申請】No1 交際費（売上原価）_FY26',
+    noHankan: '【事前申請】No2 交際費（販管費）_FY26',
+    kamoku: 'both',
+    keywords: ['懇親','親睦','議題なし','目的なし','飲み会','打ち上げ','送別','歓迎','歓送迎']
+  },
+  {
+    id: 'kaigihi',
+    type: 'kaigihi', typeLabel: '会議費',
+    title: '飲酒なし・1万円以下・議題あり の飲食',
+    detail: '飲酒なし、参加者1人税抜1万円以下、具体的議題あり。社内・社外参加問わず。',
+    noGenka: '【事前申請】No3 会議費（売上原価）_FY26',
+    noHankan: '【事前申請】No4 会議費（販管費）_FY26',
+    kamoku: 'both',
+    keywords: ['会議','打ち合わせ','ミーティング','議題','ランチ','昼食','食事','会食','1万円以下','飲酒なし','ノンアル']
+  },
+  {
+    id: 'kaigihi_snack',
+    type: 'kaigihi', typeLabel: '会議費（茶菓子・軽食）',
+    title: '会議室の茶菓子・軽食（1人1千円以下）',
+    detail: '会議室内で提供する茶菓子・軽食で、参加者1人あたり税抜1,000円以下。',
+    noGenka: '【事前申請】No3 会議費（売上原価）_FY26',
+    noHankan: '【事前申請】No4 会議費（販管費）_FY26',
+    kamoku: 'both',
+    keywords: ['茶菓子','軽食','お菓子','スナック','お茶','コーヒー','飲み物','1千円以下','1000円以下','ドリンク']
+  },
+  {
+    id: 'fukuri',
+    type: 'fukuri', typeLabel: '福利厚生費',
+    title: '全社・部門・室単位 全員参加の懇親会',
+    detail: '全社または部門・室単位で全員参加の懇親会（飲酒有無問わず）。社員旅行も含む。',
+    noGenka: '【事前申請】No5 福利厚生費（全社・部門別懇親会費）_FY26',
+    noHankan: null,
+    kamoku: 'fukuri',
+    keywords: ['懇親会','全社','部門','室','社員旅行','旅行','全員','忘年会','新年会','歓迎会','送別会','歓送迎会','福利厚生']
+  },
+  {
+    id: 'room',
+    type: 'kaigihi', typeLabel: '会議室利用料',
+    title: '会議室利用料（WeWork等）',
+    detail: '会議室利用料は専用の事前申請フォームで申請。',
+    noGenka: '【事前申請】FY26_WeWork会議室利用申請',
+    noHankan: null,
+    kamoku: 'both',
+    keywords: ['会議室','WeWork','ウィーワーク','会議室利用','レンタルスペース','貸し会議室']
+  }
+];
+
+// ===== 検索処理 =====
+function onSearchInput() {
+  const q = document.getElementById('search-input').value.trim();
+  document.getElementById('search-clear').style.display = q ? 'block' : 'none';
+  renderSearchResults(q);
+}
+
+function clearSearch() {
+  document.getElementById('search-input').value = '';
+  document.getElementById('search-clear').style.display = 'none';
+  renderSearchResults('');
+}
+
+function renderSearchResults(q) {
+  const container = document.getElementById('search-results');
+  if (!q) {
+    container.innerHTML = '<div class="search-hint">費用に関するキーワードを入力してください<br>例：「手土産」「飲酒あり」「茶菓子」「懇親会」</div>';
+    return;
+  }
+
+  const tokens = q.replace(/　/g, ' ').split(/\s+/).filter(Boolean);
+  const scored = searchIndex.map(item => {
+    const target = (item.title + item.detail + item.keywords.join(' ')).toLowerCase();
+    let score = 0;
+    for (const t of tokens) {
+      const tl = t.toLowerCase();
+      if (item.keywords.some(k => k.includes(tl) || tl.includes(k))) score += 3;
+      else if (target.includes(tl)) score += 1;
+    }
+    return { item, score };
+  }).filter(x => x.score > 0).sort((a, b) => b.score - a.score);
+
+  if (scored.length === 0) {
+    container.innerHTML = '<div class="no-result">「' + q + '」に一致する結果が見つかりませんでした。<br>別のキーワードでお試しください。</div>';
+    return;
+  }
+
+  container.innerHTML = scored.map(({ item: r }) => {
+    const kamokuBadge = r.kamoku === 'both'
+      ? '<span class="sri-kamoku both">原価/販管費どちらも対象</span>'
+      : r.kamoku === 'fukuri'
+        ? '<span class="sri-kamoku fukuri-k">原価/販管費の区別なし</span>'
+        : '';
+
+    let noHtml = '';
+    if (r.kamoku === 'both') {
+      noHtml = `
+        <div><span class="sri-no ${r.type}">📋 コンサルあり：${r.noGenka}</span></div>
+        <div style="margin-top:4px"><span class="sri-no ${r.type}">📋 コンサルなし：${r.noHankan}</span></div>`;
+    } else {
+      noHtml = `<div><span class="sri-no ${r.type}">📋 ${r.noGenka}</span></div>`;
+    }
+
+    return `
+      <div class="search-result-item ${r.type}">
+        <div><span class="sri-type ${r.type}">${r.typeLabel}</span>${kamokuBadge}</div>
+        <div class="sri-title">${r.title}</div>
+        <div class="sri-detail">${r.detail}</div>
+        ${noHtml}
+      </div>`;
+  }).join('');
+}
+
+</script>
+</body>
+</html>
