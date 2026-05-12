@@ -503,7 +503,9 @@ const results = {
     no: 'wework', title: '→ WeWork 会議室利用申請',
     hantei: '会議室使用料（WeWork）',
     detail: 'WeWork会議室の利用料は専用の事前申請フォームで申請してください。会議費（No3/No4）の申請書は使用しないでください。',
-    approval: APPROVAL_CFO, shinsei: '【事前申請】FY26_WeWork会議室利用申請', note: '',
+    approval: APPROVAL_CFO, shinsei: '【事前申請】FY26_WeWork会議室利用申請',
+    url: 'https://workflow.layerx.jp/requests/new?form_id=01KDC5NNA52QJXNHAFQM8VM7BX',
+    note: '',
   },
 
   // ===== No5 福利厚生費 =====
@@ -617,7 +619,21 @@ function addResult(key) {
   // 申請書
   const ns = document.createElement('div');
   ns.className = 'result-shinsei';
-  ns.textContent = `📋 ${r.shinsei}`;
+  if (r.url) {
+    const a = document.createElement('a');
+    a.href = r.url;
+    a.target = '_blank';
+    a.rel = 'noopener noreferrer';
+    a.textContent = `📋 ${r.shinsei}`;
+    a.style.cssText = 'color:inherit;text-decoration:underline;';
+    ns.appendChild(a);
+    const ic = document.createElement('span');
+    ic.textContent = ' ↗';
+    ic.style.cssText = 'font-size:11px;opacity:.7;';
+    ns.appendChild(ic);
+  } else {
+    ns.textContent = `📋 ${r.shinsei}`;
+  }
   card.appendChild(ns);
 
   // 注意書き
@@ -785,6 +801,7 @@ const searchIndex = [
     title:'WeWork会議室使用料',
     detail:'WeWork会議室の利用料。専用の事前申請フォームで申請。会議費（No3/No4）は使用不可。',
     shinsei: '【事前申請】FY26_WeWork会議室利用申請',
+    url: 'https://workflow.layerx.jp/requests/new?form_id=01KDC5NNA52QJXNHAFQM8VM7BX',
     keywords:['WeWork','ウィーワーク','ウイーワーク','wework','会議室','WeWork会議室'] },
 
   // No5: 福利厚生費
@@ -847,7 +864,10 @@ function renderSearchResults(q) {
       </div>
       <div class="sri-title">${r.title}</div>
       <div class="sri-detail">${r.detail}</div>
-      <div><span class="sri-shinsei">📋 ${r.shinsei}</span></div>
+      <div>${r.url
+        ? `<a href="${r.url}" target="_blank" rel="noopener noreferrer" class="sri-shinsei" style="text-decoration:underline;">📋 ${r.shinsei} ↗</a>`
+        : `<span class="sri-shinsei">📋 ${r.shinsei}</span>`
+      }</div>
     </div>`
   ).join('');
 }
