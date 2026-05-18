@@ -196,19 +196,121 @@ body {
 .sri.no5    .sri-shinsei { border-color: #0F6E56; color: #0F6E56; }
 .sri.wework .sri-shinsei { border-color: #6B46C1; color: #6B46C1; }
 
+/* 事後申請パネル */
+#post-panel { display: none; flex-direction: column; flex: 1; overflow: hidden; }
+#post-panel.visible { display: flex; }
+#post-messages {
+  flex: 1; overflow-y: auto; padding: 16px;
+  display: flex; flex-direction: column; gap: 12px;
+  background: #f7f9fc;
+}
+#post-input-area {
+  padding: 12px 16px; border-top: 1px solid #e2e8f0;
+  display: flex; gap: 8px; background: #fff;
+}
+#post-input-area input {
+  flex: 1; padding: 9px 14px; border: 1px solid #cdd5df;
+  border-radius: 24px; font-size: 14px; font-family: inherit;
+  outline: none; color: #1a1a2e; background: #f7f9fc;
+}
+#post-input-area input:focus { border-color: #185FA5; background: #fff; }
+#post-input-area button {
+  background: #185FA5; color: #fff; border: none; border-radius: 24px;
+  padding: 9px 18px; font-size: 13px; cursor: pointer; font-family: inherit; font-weight: 500;
+}
+#post-input-area button:hover { background: #0C447C; }
+
+/* 事後申請アラート */
+.post-alert {
+  margin-top: 10px; padding: 9px 13px; border-radius: 8px;
+  background: #FFF8E1; border: 1.5px solid #F59E0B; color: #7C5600;
+  font-size: 13px; font-weight: 700; display: flex; align-items: center; gap: 6px;
+}
+
+/* 事後申請結果カード */
+.post-result-card {
+  margin-top: 10px; padding: 13px 14px; border-radius: 10px;
+  font-size: 13px; line-height: 1.75;
+  background: #F0F6FF; border-left: 4px solid #185FA5; color: #0a2a4a;
+}
+.post-result-tag { font-size: 15px; font-weight: 700; margin-bottom: 6px; }
+.post-result-row { margin-bottom: 4px; font-size: 13px; }
+.post-result-row span.lbl { opacity: .65; margin-right: 4px; }
+.post-result-shinsei {
+  margin-top: 8px; padding: 7px 12px; border-radius: 8px;
+  font-size: 13px; font-weight: 700; background: #fff;
+  border: 2px solid #185FA5; display: inline-block; color: #185FA5;
+}
+.post-result-note {
+  margin-top: 8px; font-size: 11px; opacity: .65;
+  border-top: 1px solid rgba(0,0,0,.08); padding-top: 6px;
+}
+
+/* 事後申請フローカード */
+.post-flow-card {
+  margin-top: 10px; padding: 12px 14px; border-radius: 10px;
+  background: #EBF2FA; border-left: 4px solid #185FA5; font-size: 13px;
+}
+.post-flow-card--green {
+  background: #EDF7EE; border-left-color: #2E6B2B;
+}
+.post-flow-title {
+  font-size: 13px; font-weight: 700; color: #185FA5; margin-bottom: 10px;
+}
+.post-flow-card--green .post-flow-title { color: #2E6B2B; }
+.post-flow-steps { display: flex; flex-direction: column; gap: 0; }
+.post-flow-step {
+  display: flex; align-items: flex-start; gap: 8px;
+  padding: 6px 8px; background: #fff; border-radius: 6px;
+  border: 1px solid #d0e0f0; font-size: 12px; line-height: 1.5;
+}
+.post-flow-card--green .post-flow-step { border-color: #b8dab8; }
+.post-flow-step--key {
+  background: #FFF3CD; border-color: #F59E0B; font-weight: 600;
+}
+.post-step-num {
+  flex-shrink: 0; background: #185FA5; color: #fff;
+  font-size: 10px; font-weight: 700; padding: 2px 6px;
+  border-radius: 4px; margin-top: 1px;
+}
+.post-flow-card--green .post-step-num { background: #2E6B2B; }
+.post-flow-step--key .post-step-num { background: #D97706; }
+.post-step-text { color: #1a1a2e; }
+.post-flow-arrow {
+  text-align: center; font-size: 11px; color: #aab8c8;
+  padding: 2px 0; line-height: 1;
+}
+.post-flow-btn {
+  display: block; margin-top: 10px; padding: 8px 12px;
+  border-radius: 8px; font-size: 12px; font-weight: 700;
+  text-decoration: none; text-align: center;
+  border: 2px solid; transition: opacity .15s;
+}
+.post-flow-btn:hover { opacity: .8; }
+.post-flow-btn--blue  { color: #185FA5; border-color: #185FA5; background: #fff; }
+.post-flow-btn--green { color: #2E6B2B; border-color: #2E6B2B; background: #fff; }
+
+/* 取引先登録アラート */
+.post-tx-alert {
+  margin-top: 10px; padding: 9px 13px; border-radius: 8px;
+  background: #FFF8E1; border: 1.5px solid #F59E0B; color: #7C5600;
+  font-size: 13px; display: flex; align-items: flex-start; gap: 6px; line-height: 1.6;
+}
+
 #footer { text-align: center; font-size: 11px; color: #aaa; padding: 6px; background: #fff; }
 </style>
 </head>
 <body>
 <div id="app">
   <div id="header">
-    <h1>交際費・会議費 判定ボット【事前申請用】</h1>
+    <h1>交際費・会議費 判定ボット</h1>
     <p>交際費会議費規程（2026年6月1日制定）に基づき自動判定します</p>
   </div>
 
   <div id="tab-bar">
     <button class="tab-btn active" onclick="switchTab('chat')">💬 ステップ判定</button>
     <button class="tab-btn"        onclick="switchTab('search')">🔍 キーワード検索</button>
+    <button class="tab-btn"        onclick="switchTab('post')">📝 事後申請</button>
   </div>
 
   <div id="chat-panel">
@@ -230,6 +332,14 @@ body {
     </div>
     <div id="search-results">
       <div class="search-hint">費用に関するキーワードを入力してください<br>例：「手土産」「飲酒あり」「茶菓子」「会議室」「懇親会」</div>
+    </div>
+  </div>
+
+  <div id="post-panel">
+    <div id="post-messages"></div>
+    <div id="post-input-area">
+      <input type="text" id="post-user-input" placeholder="ボタンで選択してください" readonly />
+      <button onclick="postSendText()">送信</button>
     </div>
   </div>
 
@@ -658,6 +768,12 @@ function addResult(key) {
   rb.onclick = restart;
   bub.appendChild(rb);
 
+  // 事後申請アラート
+  const pa = document.createElement('div');
+  pa.className = 'post-alert';
+  pa.innerHTML = '⚠️ <span>事後申請を忘れずに！<br><small style="font-weight:400;">費用発生後は「事後申請」タブから手続きを行ってください。</small></span>';
+  bub.appendChild(pa);
+
   div.appendChild(av);
   div.appendChild(bub);
   msgs.appendChild(div);
@@ -689,7 +805,201 @@ function restart() {
   addMsg('bot', q.text, q.choices);
 }
 
+// =============================================
+// 事後申請フロー（支払方法の選択のみ）
+// =============================================
+const postMsgs = document.getElementById('post-messages');
+
+function postInit() {
+  const div = document.createElement('div');
+  div.className = 'msg bot';
+  const av = document.createElement('div');
+  av.className = 'avatar bot-av';
+  av.textContent = 'AI';
+  const bub = document.createElement('div');
+  bub.className = 'bubble';
+  bub.appendChild(document.createTextNode('事後申請のサポートをします。\n事前申請はお済みですね。\n\n支払方法を選んでください。'));
+
+  const cd = document.createElement('div');
+  cd.className = 'choices';
+  cd.style.marginTop = '10px';
+
+  const btnA = document.createElement('button');
+  btnA.className = 'choice-btn';
+  btnA.textContent = '支払申請（請求書払い）';
+  btnA.onclick = () => {
+    document.querySelectorAll('#post-panel .choice-btn').forEach(b => { b.disabled = true; });
+    postAddUserMsg('支払申請（請求書払い）');
+    setTimeout(() => postShowPayFlow('A'), 350);
+  };
+
+  const btnB = document.createElement('button');
+  btnB.className = 'choice-btn';
+  btnB.textContent = '経費精算（個人立替払い）';
+  btnB.onclick = () => {
+    document.querySelectorAll('#post-panel .choice-btn').forEach(b => { b.disabled = true; });
+    postAddUserMsg('経費精算（個人立替払い）');
+    setTimeout(() => postShowPayFlow('B'), 350);
+  };
+
+  cd.appendChild(btnA);
+  cd.appendChild(btnB);
+  bub.appendChild(cd);
+  div.appendChild(av);
+  div.appendChild(bub);
+  postMsgs.appendChild(div);
+  postMsgs.scrollTop = postMsgs.scrollHeight;
+}
+
+function postAddUserMsg(text) {
+  const div = document.createElement('div');
+  div.className = 'msg user';
+  const av = document.createElement('div');
+  av.className = 'avatar user-av';
+  av.textContent = '私';
+  const bub = document.createElement('div');
+  bub.className = 'bubble';
+  bub.textContent = text;
+  div.appendChild(av);
+  div.appendChild(bub);
+  postMsgs.appendChild(div);
+  postMsgs.scrollTop = postMsgs.scrollHeight;
+}
+
+function postShowPayFlow(type) {
+  const div = document.createElement('div');
+  div.className = 'msg bot';
+  const av = document.createElement('div');
+  av.className = 'avatar bot-av';
+  av.textContent = 'AI';
+  const bub = document.createElement('div');
+  bub.className = 'bubble';
+
+  if (type === 'A') {
+    const cardA = document.createElement('div');
+    cardA.className = 'post-flow-card';
+    cardA.innerHTML = `
+      <div class="post-flow-title">② -A　支払申請（請求書払い）</div>
+      <div class="post-flow-steps">
+        <div class="post-flow-step">
+          <span class="post-step-num">STEP 1</span>
+          <span class="post-step-text">請求書を受領する</span>
+        </div>
+        <div class="post-flow-arrow">▼</div>
+        <div class="post-flow-step">
+          <span class="post-step-num">STEP 2</span>
+          <span class="post-step-text">「FY26_支払申請」で新規申請を作成</span>
+        </div>
+        <div class="post-flow-arrow">▼</div>
+        <div class="post-flow-step post-flow-step--key">
+          <span class="post-step-num">STEP 3</span>
+          <span class="post-step-text">「<strong>購買申請</strong>」欄に<br>事前申請を紐づける【★必須】</span>
+        </div>
+        <div class="post-flow-arrow">▼</div>
+        <div class="post-flow-step">
+          <span class="post-step-num">STEP 4</span>
+          <span class="post-step-text">申請 → 承認 → 月末振込</span>
+        </div>
+      </div>
+      <a href="https://workflow.layerx.jp/requests/new?form_id=01KDZK2W8R7A9W3X414J305V55"
+         target="_blank" rel="noopener noreferrer" class="post-flow-btn post-flow-btn--blue">
+        📄 FY26_支払申請を開く ↗
+      </a>`;
+    bub.appendChild(cardA);
+  } else {
+    const cardB = document.createElement('div');
+    cardB.className = 'post-flow-card post-flow-card--green';
+    cardB.innerHTML = `
+      <div class="post-flow-title">② -B　経費精算（個人立替払い）</div>
+      <div class="post-flow-steps">
+        <div class="post-flow-step">
+          <span class="post-step-num">STEP 1</span>
+          <span class="post-step-text">領収書を受け取る</span>
+        </div>
+        <div class="post-flow-arrow">▼</div>
+        <div class="post-flow-step">
+          <span class="post-step-num">STEP 2</span>
+          <span class="post-step-text">「FY26_経費精算」で新規申請を作成</span>
+        </div>
+        <div class="post-flow-arrow">▼</div>
+        <div class="post-flow-step post-flow-step--key">
+          <span class="post-step-num">STEP 3</span>
+          <span class="post-step-text">「<strong>関連申請</strong>」欄に<br>事前申請を紐づける【★必須】</span>
+        </div>
+        <div class="post-flow-arrow">▼</div>
+        <div class="post-flow-step">
+          <span class="post-step-num">STEP 4</span>
+          <span class="post-step-text">申請 → 承認 → 個人口座振込</span>
+        </div>
+      </div>
+      <a href="https://workflow.layerx.jp/requests/new?form_id=01KDZHQZ5JERT22H06P8WCYB2E"
+         target="_blank" rel="noopener noreferrer" class="post-flow-btn post-flow-btn--green">
+        📄 FY26_経費精算を開く ↗
+      </a>`;
+    bub.appendChild(cardB);
+  }
+
+  // 取引先登録リマインダー
+  const txAlert = document.createElement('div');
+  txAlert.className = 'post-tx-alert';
+  txAlert.innerHTML = `🏢 <span><strong>取引先登録を忘れずに！</strong><br>
+    <small>支払申請・経費精算の前に取引先が未登録だと申請が進みません。</small><br>
+    <a href="https://workflow.layerx.jp/requests/new?form_id=01KPZ0QR4VJWYFHTDRFZM6PGS9"
+       target="_blank" rel="noopener noreferrer"
+       style="color:#7C5600;font-weight:700;text-decoration:underline;font-size:12px;">
+      📋 FY26_取引先登録申請を開く ↗
+    </a></span>`;
+  bub.appendChild(txAlert);
+
+  const rb = document.createElement('button');
+  rb.className = 'restart-btn';
+  rb.textContent = '↺ もう一度判定する';
+  rb.onclick = postRestart;
+  bub.appendChild(rb);
+
+  div.appendChild(av);
+  div.appendChild(bub);
+  postMsgs.appendChild(div);
+  postMsgs.scrollTop = postMsgs.scrollHeight;
+}
+
+function postHandleChoice(choice) {
+  document.querySelectorAll('#post-panel .choice-btn').forEach(b => { b.disabled = true; });
+  postAddMsg('user', choice.label);
+  const q = postQuestions[postState.step];
+  const next = q.next(choice.key);
+  postState.step = next;
+  setTimeout(() => {
+    if (postResults[next]) {
+      postAddResult(next);
+    } else if (postQuestions[next]) {
+      const nq = postQuestions[next];
+      postAddMsg('bot', nq.text, nq.choices, nq.badge || null);
+    }
+  }, 350);
+}
+
+function postSendText() { postAddMsg('bot', '上のボタンから選択してください。'); }
+
+function postRestart() {
+  postState = { step: 'post_start', consultant: null };
+  postMsgs.innerHTML = '';
+  const q = postQuestions['post_start'];
+  postAddMsg('bot', q.text, q.choices);
+}
+
+// 事後申請パネル初期表示
+postInit();
+
+function postSendText() { /* 入力不要 */ }
+
+function postRestart() {
+  postMsgs.innerHTML = '';
+  postInit();
+}
+
 inputEl.addEventListener('keydown', e => { if (e.key === 'Enter') sendText(); });
+
 
 // 初期表示
 addMsg('bot', questions['start'].text, questions['start'].choices);
@@ -700,14 +1010,20 @@ addMsg('bot', questions['start'].text, questions['start'].choices);
 function switchTab(tab) {
   const cp   = document.getElementById('chat-panel');
   const sp   = document.getElementById('search-panel');
+  const pp   = document.getElementById('post-panel');
   const tabs = document.querySelectorAll('.tab-btn');
+  cp.classList.add('hidden'); sp.classList.remove('visible'); pp.classList.remove('visible');
+  tabs.forEach(t => t.classList.remove('active'));
   if (tab === 'chat') {
-    cp.classList.remove('hidden'); sp.classList.remove('visible');
-    tabs[0].classList.add('active'); tabs[1].classList.remove('active');
-  } else {
-    cp.classList.add('hidden'); sp.classList.add('visible');
-    tabs[0].classList.remove('active'); tabs[1].classList.add('active');
+    cp.classList.remove('hidden');
+    tabs[0].classList.add('active');
+  } else if (tab === 'search') {
+    sp.classList.add('visible');
+    tabs[1].classList.add('active');
     document.getElementById('search-input').focus();
+  } else {
+    pp.classList.add('visible');
+    tabs[2].classList.add('active');
   }
 }
 
@@ -817,6 +1133,20 @@ const searchIndex = [
     detail:'全社員参加の懇親会（飲酒有無問わず）。社員旅行含む。原価/販管費の区別なし。',
     shinsei: SHINSEI.no5, url: SHINSEI_URL.no5,
     keywords:['懇親会','全社','社員旅行','旅行','全員','忘年会','新年会','歓迎会','送別会','福利厚生'] },
+
+  // 事後申請：支払申請
+  { no:'jigoA', typeLabel:'事後申請',
+    title:'支払申請（請求書払い）',
+    detail:'取引先から請求書を受け取った場合。FY26_支払申請で新規申請を作成し、購買申請欄に事前申請を紐づける。',
+    shinsei: 'FY26_支払申請', url: 'https://workflow.layerx.jp/requests/new?form_id=01KDZK2W8R7A9W3X414J305V55',
+    keywords:['請求書','支払申請','請求','インボイス','月末振込','振込','支払い'] },
+
+  // 事後申請：経費精算
+  { no:'jigoB', typeLabel:'事後申請',
+    title:'経費精算（個人立替払い）',
+    detail:'自分で立て替えて領収書を受け取った場合。FY26_経費精算で新規申請を作成し、関連申請欄に事前申請を紐づける。',
+    shinsei: 'FY26_経費精算', url: 'https://workflow.layerx.jp/requests/new?form_id=01KDZHQZ5JERT22H06P8WCYB2E',
+    keywords:['立替金','立替','経費精算','領収書','個人立替','精算','口座振込','立替払い'] },
 ];
 
 // =============================================
@@ -832,10 +1162,43 @@ function clearSearch() {
   document.getElementById('search-clear').style.display = 'none';
   renderSearchResults('');
 }
+
+function buildPostFlowCardHTML(type) {
+  if (type === 'A') {
+    return `<div class="post-flow-card" style="margin-top:0">
+      <div class="post-flow-title">② -A　支払申請（請求書払い）</div>
+      <div class="post-flow-steps">
+        <div class="post-flow-step"><span class="post-step-num">STEP 1</span><span class="post-step-text">請求書を受領する</span></div>
+        <div class="post-flow-arrow">▼</div>
+        <div class="post-flow-step"><span class="post-step-num">STEP 2</span><span class="post-step-text">「FY26_支払申請」で新規申請を作成</span></div>
+        <div class="post-flow-arrow">▼</div>
+        <div class="post-flow-step post-flow-step--key"><span class="post-step-num">STEP 3</span><span class="post-step-text">「<strong>購買申請</strong>」欄に<br>事前申請を紐づける【★必須】</span></div>
+        <div class="post-flow-arrow">▼</div>
+        <div class="post-flow-step"><span class="post-step-num">STEP 4</span><span class="post-step-text">申請 → 承認 → 月末振込</span></div>
+      </div>
+      <a href="https://workflow.layerx.jp/requests/new?form_id=01KDZK2W8R7A9W3X414J305V55" target="_blank" rel="noopener noreferrer" class="post-flow-btn post-flow-btn--blue">📄 FY26_支払申請を開く ↗</a>
+    </div>`;
+  } else {
+    return `<div class="post-flow-card post-flow-card--green" style="margin-top:0">
+      <div class="post-flow-title">② -B　経費精算（個人立替払い）</div>
+      <div class="post-flow-steps">
+        <div class="post-flow-step"><span class="post-step-num">STEP 1</span><span class="post-step-text">領収書を受け取る</span></div>
+        <div class="post-flow-arrow">▼</div>
+        <div class="post-flow-step"><span class="post-step-num">STEP 2</span><span class="post-step-text">「FY26_経費精算」で新規申請を作成</span></div>
+        <div class="post-flow-arrow">▼</div>
+        <div class="post-flow-step post-flow-step--key"><span class="post-step-num">STEP 3</span><span class="post-step-text">「<strong>関連申請</strong>」欄に<br>事前申請を紐づける【★必須】</span></div>
+        <div class="post-flow-arrow">▼</div>
+        <div class="post-flow-step"><span class="post-step-num">STEP 4</span><span class="post-step-text">申請 → 承認 → 個人口座振込</span></div>
+      </div>
+      <a href="https://workflow.layerx.jp/requests/new?form_id=01KDZHQZ5JERT22H06P8WCYB2E" target="_blank" rel="noopener noreferrer" class="post-flow-btn post-flow-btn--green">📄 FY26_経費精算を開く ↗</a>
+    </div>`;
+  }
+}
+
 function renderSearchResults(q) {
   const con = document.getElementById('search-results');
   if (!q) {
-    con.innerHTML = '<div class="search-hint">費用に関するキーワードを入力してください<br>例：「手土産」「飲酒あり」「茶菓子」「会議室」「懇親会」</div>';
+    con.innerHTML = '<div class="search-hint">費用に関するキーワードを入力してください<br>例：「手土産」「飲酒あり」「茶菓子」「会議室」「請求書」「立替金」</div>';
     return;
   }
   const tokens = q.replace(/　/g,' ').split(/\s+/).filter(Boolean);
@@ -855,7 +1218,7 @@ function renderSearchResults(q) {
     return;
   }
 
-  // 重複排除（同じshinseiが連続する場合は先頭のみ）
+  // 重複排除
   const seen = new Set();
   const deduped = scored.filter(({ item }) => {
     const key = item.shinsei + item.title;
@@ -864,7 +1227,17 @@ function renderSearchResults(q) {
     return true;
   });
 
-  con.innerHTML = deduped.map(({ item: r }) => `
+  con.innerHTML = deduped.map(({ item: r }) => {
+    // 事後申請（支払申請 / 経費精算）は専用フローカードを表示
+    const txAlertHTML = `<div class="post-tx-alert" style="margin-top:10px;">🏢 <span><strong>取引先登録を忘れずに！</strong><br><small>支払申請・経費精算の前に取引先が未登録だと申請が進みません。</small><br><a href="https://workflow.layerx.jp/requests/new?form_id=01KPZ0QR4VJWYFHTDRFZM6PGS9" target="_blank" rel="noopener noreferrer" style="color:#7C5600;font-weight:700;text-decoration:underline;font-size:12px;">📋 FY26_取引先登録申請を開く ↗</a></span></div>`;
+    if (r.no === 'jigoA') {
+      return `<div class="sri jigoA" style="padding:0;border:none;background:transparent;box-shadow:none;">${buildPostFlowCardHTML('A')}${txAlertHTML}</div>`;
+    }
+    if (r.no === 'jigoB') {
+      return `<div class="sri jigoB" style="padding:0;border:none;background:transparent;box-shadow:none;">${buildPostFlowCardHTML('B')}${txAlertHTML}</div>`;
+    }
+    // 通常の科目カード
+    return `
     <div class="sri ${r.no}">
       <div class="sri-head">
         <span class="sri-type ${r.no}">${r.typeLabel}</span>
@@ -875,8 +1248,8 @@ function renderSearchResults(q) {
         ? `<a href="${r.url}" target="_blank" rel="noopener noreferrer" class="sri-shinsei" style="text-decoration:underline;">📋 ${r.shinsei} ↗</a>`
         : `<span class="sri-shinsei">📋 ${r.shinsei}</span>`
       }</div>
-    </div>`
-  ).join('');
+    </div>`;
+  }).join('');
 }
 </script>
 </body>
