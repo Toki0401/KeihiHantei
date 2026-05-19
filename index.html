@@ -398,8 +398,8 @@ const questions = {
 
   // Q2: コンサルタント有無
   ask_consultant: {
-    text: '今回の費用に【コンサルタント（業務委託の社外スタッフ）】は参加していますか？',
-    badge: '科目区分の確認',
+    text: '今回の費用に【コンサルタント（社外の業務委託スタッフ）】は参加していますか？\n\n※自社員はコンサルタントに該当しません',
+    badge: '科目区分の確認（自社員は対象外）',
     choices: [
       { label: 'はい（コンサルタントが参加する）', key: 'yes' },
       { label: 'いいえ（参加しない）',             key: 'no'  },
@@ -575,7 +575,7 @@ const results = {
   result_room_no3: {
     no: 'no3', title: '→ 会議費（売上原価）',
     hantei: '会議室使用料（WeWork以外）',
-    detail: 'コンサルタントが参加するレンタル会議室・貸しスペース等の利用料。WeWork申請書は使用不可',
+    detail: 'コンサルタントが参加するレンタル会議室・貸しスペース等の利用料（No3:売上原価）。WeWork申請書は使用不可',
     approval: APPROVAL_CFO, shinsei: SHINSEI.no3, url: SHINSEI_URL.no3, note: '※WeWorkの申請書は使用しないでください',
   },
   result_no3_gaisha: {
@@ -601,7 +601,7 @@ const results = {
   result_room_no4: {
     no: 'no4', title: '→ 会議費（販管費）',
     hantei: '会議室使用料（WeWork以外）',
-    detail: 'コンサルタント不参加のレンタル会議室・貸しスペース等の利用料。WeWork申請書は使用不可',
+    detail: 'コンサルタント不参加のレンタル会議室・貸しスペース等の利用料（No4:販管費）。WeWork申請書は使用不可',
     approval: APPROVAL_CFO, shinsei: SHINSEI.no4, url: SHINSEI_URL.no4, note: '※WeWorkの申請書は使用しないでください',
   },
   result_no4_gaisha: {
@@ -999,7 +999,7 @@ const searchIndex = [
   // No3: 会議費（売上原価）
   { no:'no3', typeLabel:'会議費（売上原価）No3',
     title:'会議室使用料 WeWork以外（コンサルタントあり）',
-    detail:'コンサルタントが参加するレンタル会議室・貸しスペース等。WeWork申請書は使用不可。',
+    detail:'コンサルタントが参加するレンタル会議室・貸しスペース等（No3:売上原価）。WeWork申請書は使用不可。',
     shinsei: SHINSEI.no3, url: SHINSEI_URL.no3,
     keywords:['会議室','レンタル','貸しスペース','WeWork以外','コンサルタント'] },
   { no:'no3', typeLabel:'会議費（売上原価）No3',
@@ -1016,7 +1016,7 @@ const searchIndex = [
   // No4: 会議費（販管費）
   { no:'no4', typeLabel:'会議費（販管費）No4',
     title:'会議室使用料 WeWork以外（コンサルタントなし）',
-    detail:'コンサルタント不参加のレンタル会議室・貸しスペース等。WeWork申請書は使用不可。',
+    detail:'コンサルタント不参加のレンタル会議室・貸しスペース等（No4:販管費）。WeWork申請書は使用不可。',
     shinsei: SHINSEI.no4, url: SHINSEI_URL.no4,
     keywords:['会議室','レンタル','貸しスペース','WeWork以外'] },
   { no:'no4', typeLabel:'会議費（販管費）No4',
