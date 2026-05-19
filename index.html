@@ -485,20 +485,7 @@ const questions = {
     ],
     next: k => {
       if (k === 'yes') return state.consultant ? 'result_no3_snack' : 'result_no4_snack';
-      return 'ask_cost_naibu'; // 社内飲食の金額チェック
-    },
-  },
-
-  // Q9: 社内飲食・1万円以下？
-  ask_cost_naibu: {
-    text: '1人あたりの飲食費用（税抜）はいくらですか？',
-    choices: [
-      { label: '1万円以下（ちょうど1万円はここ）', key: 'low'  },
-      { label: '1万円超',                           key: 'high' },
-    ],
-    next: k => {
-      if (k === 'high') return state.consultant ? 'result_no1_naibu_high' : 'result_no2_naibu_high';
-      return state.consultant ? 'result_no3_naibu' : 'result_no4_naibu';
+      return state.consultant ? 'result_no1_naibu_high' : 'result_no2_naibu_high';
     },
   },
 };
@@ -534,8 +521,8 @@ const results = {
   },
   result_no1_naibu_high: {
     no: 'no1', title: '→ 交際費（売上原価）',
-    hantei: '社内のみ・飲酒なし・1万円超の飲食',
-    detail: 'コンサルタントが参加。社内従業員のみで飲酒なし・議題ありの飲食だが、1人あたり税抜1万円超の場合は交際費',
+    hantei: '社内のみ・飲酒なし・茶菓子1千円超の飲食',
+    detail: 'コンサルタントが参加。社内のみ・飲酒なし・議題あり。茶菓子軽食（1千円以下）を超える飲食は交際費',
     approval: APPROVAL_CFO, shinsei: SHINSEI.no1, url: SHINSEI_URL.no1, note: '',
   },
 
@@ -566,8 +553,8 @@ const results = {
   },
   result_no2_naibu_high: {
     no: 'no2', title: '→ 交際費（販管費）',
-    hantei: '社内のみ・飲酒なし・1万円超の飲食',
-    detail: 'コンサルタント不参加。社内従業員のみで飲酒なし・議題ありの飲食だが、1人あたり税抜1万円超の場合は交際費',
+    hantei: '社内のみ・飲酒なし・茶菓子1千円超の飲食',
+    detail: 'コンサルタント不参加。社内のみ・飲酒なし・議題あり。茶菓子軽食（1千円以下）を超える飲食は交際費',
     approval: APPROVAL_CFO, shinsei: SHINSEI.no2, url: SHINSEI_URL.no2, note: '',
   },
 
@@ -590,12 +577,6 @@ const results = {
     detail: 'コンサルタントが参加。会議室内の茶菓子・軽食、1人あたり税抜1,000円以下',
     approval: APPROVAL_CFO, shinsei: SHINSEI.no3, url: SHINSEI_URL.no3, note: '',
   },
-  result_no3_naibu: {
-    no: 'no3', title: '→ 会議費（売上原価）',
-    hantei: '飲酒なし・1万円以下・議題あり（社内のみ）',
-    detail: 'コンサルタントが参加。社内従業員のみで飲酒なし、参加者1人税抜1万円以下、具体的議題あり',
-    approval: APPROVAL_CFO, shinsei: SHINSEI.no3, url: SHINSEI_URL.no3, note: '',
-  },
 
   // ===== No4 会議費（販管費）=====
   result_room_no4: {
@@ -614,12 +595,6 @@ const results = {
     no: 'no4', title: '→ 会議費（販管費）',
     hantei: '社内会議の茶菓子・軽食（1人1千円以下）',
     detail: 'コンサルタント不参加。会議室内の茶菓子・軽食、1人あたり税抜1,000円以下',
-    approval: APPROVAL_CFO, shinsei: SHINSEI.no4, url: SHINSEI_URL.no4, note: '',
-  },
-  result_no4_naibu: {
-    no: 'no4', title: '→ 会議費（販管費）',
-    hantei: '飲酒なし・1万円以下・議題あり（社内のみ）',
-    detail: 'コンサルタント不参加。社内従業員のみで飲酒なし、参加者1人税抜1万円以下、具体的議題あり',
     approval: APPROVAL_CFO, shinsei: SHINSEI.no4, url: SHINSEI_URL.no4, note: '',
   },
 
@@ -1003,11 +978,6 @@ const searchIndex = [
     shinsei: SHINSEI.no3, url: SHINSEI_URL.no3,
     keywords:['会議室','レンタル','貸しスペース','WeWork以外','コンサルタント'] },
   { no:'no3', typeLabel:'会議費（売上原価）No3',
-    title:'飲酒なし・1万円以下・議題あり（コンサルタントあり）',
-    detail:'コンサルタント参加。飲酒なし・1人税抜1万円以下・具体的議題あり（社内外問わず）。',
-    shinsei: SHINSEI.no3, url: SHINSEI_URL.no3,
-    keywords:['会議','打ち合わせ','ミーティング','議題','ランチ','昼食','飲酒なし','コンサルタント'] },
-  { no:'no3', typeLabel:'会議費（売上原価）No3',
     title:'社内会議の茶菓子・軽食（コンサルタントあり、1人1千円以下）',
     detail:'コンサルタントが参加する会議室内の茶菓子・軽食。1人税抜1,000円以下。',
     shinsei: SHINSEI.no3, url: SHINSEI_URL.no3,
@@ -1019,11 +989,6 @@ const searchIndex = [
     detail:'コンサルタント不参加のレンタル会議室・貸しスペース等（No4:販管費）。WeWork申請書は使用不可。',
     shinsei: SHINSEI.no4, url: SHINSEI_URL.no4,
     keywords:['会議室','レンタル','貸しスペース','WeWork以外'] },
-  { no:'no4', typeLabel:'会議費（販管費）No4',
-    title:'飲酒なし・1万円以下・議題あり（コンサルタントなし）',
-    detail:'コンサルタント不参加。飲酒なし・1人税抜1万円以下・具体的議題あり（社内外問わず）。',
-    shinsei: SHINSEI.no4, url: SHINSEI_URL.no4,
-    keywords:['会議','打ち合わせ','ミーティング','議題','ランチ','昼食','飲酒なし'] },
   { no:'no4', typeLabel:'会議費（販管費）No4',
     title:'社内会議の茶菓子・軽食（コンサルタントなし、1人1千円以下）',
     detail:'コンサルタント不参加。会議室内の茶菓子・軽食。1人税抜1,000円以下。',
