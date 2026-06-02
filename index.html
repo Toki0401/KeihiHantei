@@ -435,17 +435,23 @@ const questions = {
     },
   },
 
-  // Q4b: コンサルタント職社員の有無（社内のみルート）
+  // Q4b: コンサルタント職社員の有無（社内のみ×会議室使用料ルート専用）
   ask_consultant_inner: {
-    text: '今回の会議・会食に、コンサルタント職の社員は参加していますか？',
+    text: '今回の会議に、コンサルタント職の社員は参加していますか？',
     badge: '科目区分の確認',
     choices: [
       { label: 'はい（コンサルタント職社員が参加する）', key: 'yes' },
       { label: 'いいえ（コンサルタント職社員は不参加）', key: 'no'  },
     ],
     next: k => {
-      state.consultant = (k === 'yes');
-      if (state._type === 'room') return state.consultant ? 'result_room_no3' : 'result_room_no4';
+      // 会議室使用料のみコンサル有無で売上原価/販管費を分岐
+      // 飲食（社内のみ）はコンサル参加があっても案件に紐づかないため販管費固定
+      if (state._type === 'room') {
+        state.consultant = (k === 'yes');
+        return state.consultant ? 'result_room_no3' : 'result_room_no4';
+      }
+      // 飲食：コンサル有無に関わらず販管費ルートへ（consultant=falseで固定）
+      state.consultant = false;
       return 'ask_drinking';
     },
   },
