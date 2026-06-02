@@ -599,7 +599,7 @@ const results = {
   result_no2_naibu_high: {
     no: 'no2', title: '→ 交際費（販管費）',
     hantei: '社内のみ・飲酒なし・茶菓子1千円超の飲食',
-    detail: 'コンサルタント職社員不参加。社内のみ・飲酒なし・議題あり。茶菓子軽食（1千円以下）を超える飲食は交際費',
+    detail: '社内人員のみの参加。飲酒なし・議題あり。茶菓子軽食（1千円以下）を超える飲食は交際費',
     approval: APPROVAL_CFO, shinsei: SHINSEI.no2, url: SHINSEI_URL.no2, note: '',
   },
 
@@ -627,7 +627,7 @@ const results = {
   result_room_no4: {
     no: 'no4', title: '→ 会議費（販管費）',
     hantei: '会議室使用料（WeWork以外）',
-    detail: 'コンサルタント職社員不参加のレンタル会議室・貸しスペース等の利用料（No4:販管費）。WeWork申請書は使用不可',
+    detail: '社内人員のみの参加によるレンタル会議室・貸しスペース等の利用料（No4:販管費）。WeWork申請書は使用不可',
     approval: APPROVAL_CFO, shinsei: SHINSEI.no4, url: SHINSEI_URL.no4, note: '※WeWorkの申請書は使用しないでください',
   },
   result_no4_gaisha: {
@@ -639,7 +639,7 @@ const results = {
   result_no4_snack: {
     no: 'no4', title: '→ 会議費（販管費）',
     hantei: '社内会議の茶菓子・軽食（1人1千円以下）',
-    detail: 'コンサルタント職社員不参加。会議室内の茶菓子・軽食、1人あたり税抜1,000円以下',
+    detail: '社内人員のみの参加。会議室内の茶菓子・軽食、1人あたり税抜1,000円以下',
     approval: APPROVAL_CFO, shinsei: SHINSEI.no4, url: SHINSEI_URL.no4, note: '',
   },
 
@@ -1017,7 +1017,7 @@ const searchIndex = [
     keywords:['懇親','親睦','議題なし','打ち上げ','送別','歓迎','飲み会'] },
   { no:'no2', typeLabel:'交際費（販管費）No2',
     title:'社内のみ・飲酒なし・1万円超（コンサルタントなし）',
-    detail:'コンサルタント職社員不参加。社内のみ・飲酒なし・議題ありでも1人税抜1万円超なら交際費。',
+    detail:'社内人員のみの参加。飲酒なし・議題ありでも1人税抜1万円超なら交際費。',
     shinsei: SHINSEI.no2, url: SHINSEI_URL.no2,
     keywords:['社内','1万円超','飲酒なし'] },
 
@@ -1036,12 +1036,12 @@ const searchIndex = [
   // No4: 会議費（販管費）
   { no:'no4', typeLabel:'会議費（販管費）No4',
     title:'会議室使用料 WeWork以外（コンサルタントなし）',
-    detail:'コンサルタント職社員不参加のレンタル会議室・貸しスペース等（No4:販管費）。WeWork申請書は使用不可。',
+    detail:'社内人員のみの参加によるレンタル会議室・貸しスペース等（No4:販管費）。WeWork申請書は使用不可。',
     shinsei: SHINSEI.no4, url: SHINSEI_URL.no4,
     keywords:['会議室','レンタル','貸しスペース','WeWork以外'] },
   { no:'no4', typeLabel:'会議費（販管費）No4',
     title:'社内会議の茶菓子・軽食（コンサルタントなし、1人1千円以下）',
-    detail:'コンサルタント職社員不参加。会議室内の茶菓子・軽食。1人税抜1,000円以下。',
+    detail:'社内人員のみの参加。会議室内の茶菓子・軽食。1人税抜1,000円以下。',
     shinsei: SHINSEI.no4, url: SHINSEI_URL.no4,
     keywords:['茶菓子','軽食','お菓子','コーヒー','飲み物','1千円以下'] },
 
