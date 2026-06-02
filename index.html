@@ -111,7 +111,9 @@ body {
   font-size: 13px; font-weight: 700; background: #fff;
   border: 2px solid currentColor; display: inline-block;
 }
-.result-card.no1 .result-shinsei { color: #c0392b; }
+.result-card.error { background: #FFF3F3; border-left: 4px solid #c0392b; color: #4a1b0c; }
+.kamoku-error { background: #c0392b; color: #fff; }
+.result-card.error .result-shinsei { color: #c0392b; }
 .result-card.no2 .result-shinsei { color: #a93226; }
 .result-card.no3 .result-shinsei { color: #3B6D11; }
 .result-card.no4 .result-shinsei { color: #2E6B2B; }
@@ -423,14 +425,28 @@ const questions = {
     next: k => {
       state._member = k;
       if (k === 'inner') {
-        // 社員のみ → コンサルタント不在確定 → 販管費ルート
-        state.consultant = false;
-        if (state._type === 'room')    return 'result_room_no4';
-        if (state._type === 'settai')  return 'result_no2_settai';
-        return 'ask_drinking';
+        // 接待・贈答 × 社内従業員のみ → ありえない組み合わせ → エラー
+        if (state._type === 'settai')  return 'result_error_settai_inner';
+        // 会議室・飲食 × 社内のみ → コンサル有無を確認
+        return 'ask_consultant_inner';
       }
       // 社外あり → コンサルタント職社員の有無を確認
       return 'ask_consultant';
+    },
+  },
+
+  // Q4b: コンサルタント職社員の有無（社内のみルート）
+  ask_consultant_inner: {
+    text: '今回の会議・会食に、コンサルタント職の社員は参加していますか？',
+    badge: '科目区分の確認',
+    choices: [
+      { label: 'はい（コンサルタント職社員が参加する）', key: 'yes' },
+      { label: 'いいえ（コンサルタント職社員は不参加）', key: 'no'  },
+    ],
+    next: k => {
+      state.consultant = (k === 'yes');
+      if (state._type === 'room') return state.consultant ? 'result_room_no3' : 'result_room_no4';
+      return 'ask_drinking';
     },
   },
 
@@ -491,7 +507,7 @@ const questions = {
     },
   },
 
-  // Q8: 茶菓子・軽食のみ？（社内のみルート）
+  // Q8: 茶菓子・軽食のみ？（社内のみルート）※コンサル有無はask_consultant_innerで確定済み
   ask_snack: {
     text: '会議室で提供する茶菓子・軽食のみですか？\n（1人あたり税抜1千円以下）',
     choices: [
@@ -509,6 +525,14 @@ const questions = {
 // 結果定義（判定結果一覧表 No1〜15 完全対応）
 // =============================================
 const results = {
+  // ===== エラー：接待・贈答×社内従業員のみ =====
+  result_error_settai_inner: {
+    no: 'error', title: '⚠️ この組み合わせは対象外です',
+    hantei: '接待・贈答（社内従業員のみ）',
+    detail: '接待・贈答は社外の取引先・顧客等が対象です。社内従業員のみの場合は「接待・贈答」には該当しません。\n\n判定をやり直して、費用の内容を「飲食費（食事・会食など）」または別の区分でお試しください。',
+    approval: '', shinsei: '', url: '', note: '',
+  },
+
   // ===== No1 交際費（売上原価）=====
   result_no1_settai: {
     no: 'no1', title: '→ 交際費（売上原価）',
@@ -696,6 +720,7 @@ function addResult(key) {
     no4: { text: '販管費',   cls: 'kamoku-no4' },
     no5:    { text: '原価/販管費の区別なし', cls: 'kamoku-no5' },
     wework: { text: 'WeWork専用申請',         cls: 'kamoku-wework' },
+    error:  { text: '対象外',                 cls: 'kamoku-error' },
   };
   const km = kamokuMap[r.no];
 
@@ -728,10 +753,11 @@ function addResult(key) {
   // 承認者
   const ap = document.createElement('div');
   ap.className = 'result-app';
-  ap.textContent = `【承認者】${r.approval}`;
+  if (r.no !== 'error') ap.textContent = `【承認者】${r.approval}`;
   card.appendChild(ap);
 
   // 申請書
+  if (r.no !== 'error') {
   const ns = document.createElement('div');
   ns.className = 'result-shinsei';
   if (r.url) {
@@ -750,6 +776,7 @@ function addResult(key) {
     ns.textContent = `📋 ${r.shinsei}`;
   }
   card.appendChild(ns);
+  }
 
   // 注意書き
   if (r.note) {
@@ -767,10 +794,12 @@ function addResult(key) {
   bub.appendChild(rb);
 
   // 事後申請アラート
+  if (r.no !== 'error') {
   const pa = document.createElement('div');
   pa.className = 'post-alert';
   pa.innerHTML = '⚠️ <span>事後申請を忘れずに！<br><small style="font-weight:400;">費用発生後は「事後申請」タブから手続きを行ってください。</small></span>';
   bub.appendChild(pa);
+  }
 
   div.appendChild(av);
   div.appendChild(bub);
